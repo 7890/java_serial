@@ -1,0 +1,167 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>/* jSSC (Java Simple Serial Connector) - serial port communication library.<a name="line.1"></a>
+<span class="sourceLineNo">002</span> * © Alexey Sokolov (scream3r), 2010-2014.<a name="line.2"></a>
+<span class="sourceLineNo">003</span> *<a name="line.3"></a>
+<span class="sourceLineNo">004</span> * This file is part of jSSC.<a name="line.4"></a>
+<span class="sourceLineNo">005</span> *<a name="line.5"></a>
+<span class="sourceLineNo">006</span> * jSSC is free software: you can redistribute it and/or modify<a name="line.6"></a>
+<span class="sourceLineNo">007</span> * it under the terms of the GNU Lesser General Public License as published by<a name="line.7"></a>
+<span class="sourceLineNo">008</span> * the Free Software Foundation, either version 3 of the License, or<a name="line.8"></a>
+<span class="sourceLineNo">009</span> * (at your option) any later version.<a name="line.9"></a>
+<span class="sourceLineNo">010</span> *<a name="line.10"></a>
+<span class="sourceLineNo">011</span> * jSSC is distributed in the hope that it will be useful,<a name="line.11"></a>
+<span class="sourceLineNo">012</span> * but WITHOUT ANY WARRANTY; without even the implied warranty of<a name="line.12"></a>
+<span class="sourceLineNo">013</span> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the<a name="line.13"></a>
+<span class="sourceLineNo">014</span> * GNU Lesser General Public License for more details.<a name="line.14"></a>
+<span class="sourceLineNo">015</span> *<a name="line.15"></a>
+<span class="sourceLineNo">016</span> * You should have received a copy of the GNU Lesser General Public License<a name="line.16"></a>
+<span class="sourceLineNo">017</span> * along with jSSC.  If not, see &lt;http://www.gnu.org/licenses/&gt;.<a name="line.17"></a>
+<span class="sourceLineNo">018</span> *<a name="line.18"></a>
+<span class="sourceLineNo">019</span> * If you use jSSC in public project you can inform me about this by e-mail,<a name="line.19"></a>
+<span class="sourceLineNo">020</span> * of course if you want it.<a name="line.20"></a>
+<span class="sourceLineNo">021</span> *<a name="line.21"></a>
+<span class="sourceLineNo">022</span> * e-mail: scream3r.org@gmail.com<a name="line.22"></a>
+<span class="sourceLineNo">023</span> * web-site: http://scream3r.org | http://code.google.com/p/java-simple-serial-connector/<a name="line.23"></a>
+<span class="sourceLineNo">024</span> */<a name="line.24"></a>
+<span class="sourceLineNo">025</span>package jssc;<a name="line.25"></a>
+<span class="sourceLineNo">026</span><a name="line.26"></a>
+<span class="sourceLineNo">027</span>/**<a name="line.27"></a>
+<span class="sourceLineNo">028</span> *<a name="line.28"></a>
+<span class="sourceLineNo">029</span> * @author scream3r<a name="line.29"></a>
+<span class="sourceLineNo">030</span> */<a name="line.30"></a>
+<span class="sourceLineNo">031</span>public class SerialPortException extends Exception {<a name="line.31"></a>
+<span class="sourceLineNo">032</span><a name="line.32"></a>
+<span class="sourceLineNo">033</span>    final public static String TYPE_PORT_ALREADY_OPENED = "Port already opened";<a name="line.33"></a>
+<span class="sourceLineNo">034</span>    final public static String TYPE_PORT_NOT_OPENED = "Port not opened";<a name="line.34"></a>
+<span class="sourceLineNo">035</span>    final public static String TYPE_CANT_SET_MASK = "Can't set mask";<a name="line.35"></a>
+<span class="sourceLineNo">036</span>    final public static String TYPE_LISTENER_ALREADY_ADDED = "Event listener already added";<a name="line.36"></a>
+<span class="sourceLineNo">037</span>    final public static String TYPE_LISTENER_THREAD_INTERRUPTED = "Event listener thread interrupted";<a name="line.37"></a>
+<span class="sourceLineNo">038</span>    final public static String TYPE_CANT_REMOVE_LISTENER = "Can't remove event listener, because listener not added";<a name="line.38"></a>
+<span class="sourceLineNo">039</span>    /**<a name="line.39"></a>
+<span class="sourceLineNo">040</span>     * @since 0.8<a name="line.40"></a>
+<span class="sourceLineNo">041</span>     */<a name="line.41"></a>
+<span class="sourceLineNo">042</span>    final public static String TYPE_PARAMETER_IS_NOT_CORRECT = "Parameter is not correct";<a name="line.42"></a>
+<span class="sourceLineNo">043</span>    /**<a name="line.43"></a>
+<span class="sourceLineNo">044</span>     * @since 0.8<a name="line.44"></a>
+<span class="sourceLineNo">045</span>     */<a name="line.45"></a>
+<span class="sourceLineNo">046</span>    final public static String TYPE_NULL_NOT_PERMITTED = "Null not permitted";<a name="line.46"></a>
+<span class="sourceLineNo">047</span>    /**<a name="line.47"></a>
+<span class="sourceLineNo">048</span>     * @since 0.9.0<a name="line.48"></a>
+<span class="sourceLineNo">049</span>     */<a name="line.49"></a>
+<span class="sourceLineNo">050</span>    final public static String TYPE_PORT_BUSY = "Port busy";<a name="line.50"></a>
+<span class="sourceLineNo">051</span>    /**<a name="line.51"></a>
+<span class="sourceLineNo">052</span>     * @since 0.9.0<a name="line.52"></a>
+<span class="sourceLineNo">053</span>     */<a name="line.53"></a>
+<span class="sourceLineNo">054</span>    final public static String TYPE_PORT_NOT_FOUND = "Port not found";<a name="line.54"></a>
+<span class="sourceLineNo">055</span>    /**<a name="line.55"></a>
+<span class="sourceLineNo">056</span>     * @since 2.2.0<a name="line.56"></a>
+<span class="sourceLineNo">057</span>     */<a name="line.57"></a>
+<span class="sourceLineNo">058</span>    final public static String TYPE_PERMISSION_DENIED = "Permission denied";<a name="line.58"></a>
+<span class="sourceLineNo">059</span>    /**<a name="line.59"></a>
+<span class="sourceLineNo">060</span>     * @since 2.3.0<a name="line.60"></a>
+<span class="sourceLineNo">061</span>     */<a name="line.61"></a>
+<span class="sourceLineNo">062</span>    final public static String TYPE_INCORRECT_SERIAL_PORT = "Incorrect serial port";<a name="line.62"></a>
+<span class="sourceLineNo">063</span><a name="line.63"></a>
+<span class="sourceLineNo">064</span>    private String portName;<a name="line.64"></a>
+<span class="sourceLineNo">065</span>    private String methodName;<a name="line.65"></a>
+<span class="sourceLineNo">066</span>    private String exceptionType;<a name="line.66"></a>
+<span class="sourceLineNo">067</span><a name="line.67"></a>
+<span class="sourceLineNo">068</span>    public SerialPortException(String portName, String methodName, String exceptionType){<a name="line.68"></a>
+<span class="sourceLineNo">069</span>        super("Port name - " + portName + "; Method name - " + methodName + "; Exception type - " + exceptionType + ".");<a name="line.69"></a>
+<span class="sourceLineNo">070</span>        this.portName = portName;<a name="line.70"></a>
+<span class="sourceLineNo">071</span>        this.methodName = methodName;<a name="line.71"></a>
+<span class="sourceLineNo">072</span>        this.exceptionType = exceptionType;<a name="line.72"></a>
+<span class="sourceLineNo">073</span>    }<a name="line.73"></a>
+<span class="sourceLineNo">074</span><a name="line.74"></a>
+<span class="sourceLineNo">075</span>    /**<a name="line.75"></a>
+<span class="sourceLineNo">076</span>     * Getting port name during operation with which the exception was called<a name="line.76"></a>
+<span class="sourceLineNo">077</span>     */<a name="line.77"></a>
+<span class="sourceLineNo">078</span>    public String getPortName(){<a name="line.78"></a>
+<span class="sourceLineNo">079</span>        return portName;<a name="line.79"></a>
+<span class="sourceLineNo">080</span>    }<a name="line.80"></a>
+<span class="sourceLineNo">081</span><a name="line.81"></a>
+<span class="sourceLineNo">082</span>    /**<a name="line.82"></a>
+<span class="sourceLineNo">083</span>     * Getting method name during execution of which the exception was called<a name="line.83"></a>
+<span class="sourceLineNo">084</span>     */<a name="line.84"></a>
+<span class="sourceLineNo">085</span>    public String getMethodName(){<a name="line.85"></a>
+<span class="sourceLineNo">086</span>        return methodName;<a name="line.86"></a>
+<span class="sourceLineNo">087</span>    }<a name="line.87"></a>
+<span class="sourceLineNo">088</span><a name="line.88"></a>
+<span class="sourceLineNo">089</span>    /**<a name="line.89"></a>
+<span class="sourceLineNo">090</span>     * Getting exception type<a name="line.90"></a>
+<span class="sourceLineNo">091</span>     */<a name="line.91"></a>
+<span class="sourceLineNo">092</span>    public String getExceptionType(){<a name="line.92"></a>
+<span class="sourceLineNo">093</span>        return exceptionType;<a name="line.93"></a>
+<span class="sourceLineNo">094</span>    }<a name="line.94"></a>
+<span class="sourceLineNo">095</span>}<a name="line.95"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

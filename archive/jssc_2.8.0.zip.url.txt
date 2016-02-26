@@ -1,0 +1,2 @@
+https://github.com/scream3r/java-simple-serial-connector/archive/2.8.0.zip
+Fri Feb 26 00:40:03 CET 2016
