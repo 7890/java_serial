@@ -3,6 +3,8 @@ import jssc.*;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.lang.*;
+import java.lang.reflect.*;
 
 //========================================================================
 //========================================================================
@@ -26,11 +28,13 @@ public class SerialReader
 	static String date_format_string="yyyy-MM-dd_HH-mm-ss";//.SSSZ";
 	static String timezone_id="UTC";
 	static String raw_log_file_postfix="_"+timezone_id+".nmea";
+	static boolean hook_enabled=false;
+	static String hook_class="";
 	//===end configurable parameters
 
 	static SimpleDateFormat date_format = new SimpleDateFormat(date_format_string);
-
 	static long total_bytes_received=0;
+	static SerialHookInterface sh;
 
 //========================================================================
 	public static void main(String[] args)
@@ -51,6 +55,14 @@ public class SerialReader
 				System.err.println("/!\\ Could not load properties");
 			}
 
+			if(hook_enabled)
+			{
+				Class<?> c = Class.forName(hook_class);
+				Constructor<?> cons = c.getConstructor();//String.class);
+				sh = (SerialHookInterface)cons.newInstance();//"MyAttributeValue");
+				sh.startup();
+			}
+
 			if(raw_log_to_file)
 			{
 				date_format.setTimeZone(TimeZone.getTimeZone(timezone_id));
@@ -58,6 +70,11 @@ public class SerialReader
 				String raw_log_file_uri=raw_log_file_base_path+File.separator+raw_log_file_name;
 				System.err.println("Writing to log file '"+raw_log_file_uri+"'");
 				writer_raw=new PrintWriter(raw_log_file_uri, "UTF-8");
+
+				if(hook_enabled)
+				{
+					sh.logFile(raw_log_file_base_path,raw_log_file_name);
+				}
 			}
 
 			if(args.length>1)
@@ -70,23 +87,89 @@ public class SerialReader
 
 			serialPort.openPort();
 			serialPort.setParams(baudrate, 8, 1, 0);
+
+			if(hook_enabled)
+			{
+				sh.portConnect(portname,baudrate);
+			}
+
 			serialPort.setEventsMask(SerialPort.MASK_RXCHAR);
 			serialPort.addEventListener(new SerialPortReader());
 			//serialPort.writeString("HelloWorld");
+
+			Runtime.getRuntime().addShutdownHook(new Thread()
+			{
+				public void run()
+				{
+					try
+					{
+						System.err.println("Shutting down ...");
+						serialPort.removeEventListener();
+						serialPort.closePort();
+						if(raw_log_to_file)
+						{
+							writer_raw.close();
+						}
+						if(hook_enabled)
+						{
+							sh.shutdown();
+						}
+					}
+					catch(SerialPortException e)
+					{
+						System.err.println(e);
+					}
+				}
+			});
+
+			//check stop condition here
+			while(1==1)
+			{
+				Thread.sleep(100);
+			}
+		}
+		catch (InterruptedException e)
+		{
+			System.err.println(e);
 		}
 		catch (FileNotFoundException e)
 		{
-			System.out.println(e);
+			System.err.println(e);
 			System.exit(1);
 		}
 		catch (UnsupportedEncodingException e)
 		{
-			System.out.println(e);
+			System.err.println(e);
 			System.exit(1);
 		}
 		catch (SerialPortException e)
 		{
-			System.out.println(e);
+			System.err.println(e);
+			System.exit(1);
+		}
+		catch (ClassNotFoundException e)
+		{
+			System.err.println(e);
+			System.exit(1);
+		}
+		catch (NoSuchMethodException e)
+		{
+			System.err.println(e);
+			System.exit(1);
+		}
+		catch (InstantiationException e)
+		{
+			System.err.println(e);
+			System.exit(1);
+		}
+		catch (IllegalAccessException e)
+		{
+			System.err.println(e);
+			System.exit(1);
+		}
+		catch (InvocationTargetException e)
+		{
+			System.err.println(e);
 			System.exit(1);
 		}
 	}//end main()
@@ -107,6 +190,12 @@ public class SerialReader
 
 					//read all available bytes to string
 					String data= serialPort.readString(bytes_available);
+
+					if(hook_enabled)
+					{
+						sh.serialData(data);
+					}
+
 					if(stdout_show.equals("raw"))
 					{
 						System.out.print(data);
@@ -186,6 +275,10 @@ public class SerialReader
 							{timezone_id=props.getProperty("timezone_id");}
 						if(props.getProperty("raw_log_file_postfix")!=null)
 							{raw_log_file_postfix=props.getProperty("raw_log_file_postfix");}
+						if(props.getProperty("hook_enabled")!=null)
+							{hook_enabled=Boolean.parseBoolean(props.getProperty("hook_enabled"));}
+						if(props.getProperty("hook_class")!=null)
+							{hook_class=props.getProperty("hook_class");}
 						//if(props.getProperty("")!=null){=props.getProperty("");}
 						return true;
 					}
