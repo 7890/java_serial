@@ -169,6 +169,30 @@ public class SerialReader
 	}
 
 //========================================================================
+	void splitLogfile() throws Exception
+	{
+		if(serialPort!=null)
+		{
+			serialPort.removeEventListener();
+		}
+
+		if(raw_log_to_file && writer_raw!=null)
+		{
+			writer_raw.close();
+		}
+
+		if(hook_enabled && sh!=null)
+		{///
+		}
+
+		if(raw_log_to_file)
+		{
+			createLogWriter(createLogFileUri());
+		}
+		addEventListener();
+	}
+
+//========================================================================
 	void connectSerialPort(String portname, int baudrate) throws Exception
 	{
 		serialPort=new SerialPort(portname); 
