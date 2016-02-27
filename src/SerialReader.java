@@ -10,31 +10,30 @@ import java.lang.reflect.*;
 //========================================================================
 public class SerialReader
 {
-	static SerialPort serialPort;
-	static String portname="/dev/ttyUSB0";
-	static int baudrate=9600;
-
-	static PrintWriter writer_raw;
-
+	SerialPort serialPort=null;
+	PrintWriter writer_raw=null;
 	//this file is loaded if found in current directory
-	static String propertiesFileUri="SerialReader.properties";
+	String propertiesFileUri="SerialReader.properties";
 
 	//===configurable parameters (here: default values)
 	//none | progress | none
-	static String stdout_show="raw";
-	static boolean raw_log_to_file=false;
-	static String raw_log_file_base_path="./";
-	static String raw_log_file_prefix="serial_log_";
-	static String date_format_string="yyyy-MM-dd_HH-mm-ss";//.SSSZ";
-	static String timezone_id="UTC";
-	static String raw_log_file_postfix="_"+timezone_id+".nmea";
-	static boolean hook_enabled=false;
-	static String hook_class="";
+	String stdout_show="raw";
+	boolean raw_log_to_file=false;
+	String raw_log_file_base_path="./";
+	String raw_log_file_prefix="serial_log_";
+	String date_format_string="yyyy-MM-dd_HH-mm-ss";//.SSSZ";
+	String timezone_id="UTC";
+	String raw_log_file_postfix="_"+timezone_id+".nmea";
+	boolean hook_enabled=false;
+	String hook_class="";
 	//===end configurable parameters
 
-	static SimpleDateFormat date_format = new SimpleDateFormat(date_format_string);
-	static long total_bytes_received=0;
-	static SerialHookInterface sh;
+	SimpleDateFormat date_format=new SimpleDateFormat(date_format_string);
+	long total_bytes_received=0;
+	SerialHookInterface sh=null;
+
+//========================================================================
+	public SerialReader(){}
 
 //========================================================================
 	public static void main(String[] args)
@@ -44,83 +43,37 @@ public class SerialReader
 			System.err.println("Need port argument");
 			System.err.println("Syntax: <serial portname> (baudrate)");
 			System.err.println("Example: /dev/ttyACM0 115200");
-			System.err.println("Default baudrate: "+baudrate);
+			System.err.println("Default baudrate: 9600");
 			System.exit(1);
 		}
 
+		SerialReader sr=new SerialReader();
+
 		try
 		{
-			if(!loadProps(propertiesFileUri))
+			sr.loadProps();
+
+			if(sr.hook_enabled)
 			{
-				System.err.println("/!\\ Could not load properties");
+				sr.addHook(sr.hook_class);
+			}
+			if(sr.raw_log_to_file)
+			{
+				sr.createLogWriter(sr.createLogFileUri());
 			}
 
-			if(hook_enabled)
-			{
-				Class<?> c = Class.forName(hook_class);
-				Constructor<?> cons = c.getConstructor();//String.class);
-				sh = (SerialHookInterface)cons.newInstance();//"MyAttributeValue");
-				sh.startup();
-			}
+			sr.addShutdownHook();
 
-			if(raw_log_to_file)
-			{
-				date_format.setTimeZone(TimeZone.getTimeZone(timezone_id));
-				String raw_log_file_name=raw_log_file_prefix+date_format.format(new Date())+raw_log_file_postfix;
-				String raw_log_file_uri=raw_log_file_base_path+File.separator+raw_log_file_name;
-				System.err.println("Writing to log file '"+raw_log_file_uri+"'");
-				writer_raw=new PrintWriter(raw_log_file_uri, "UTF-8");
-
-				if(hook_enabled)
-				{
-					sh.logFile(raw_log_file_base_path,raw_log_file_name);
-				}
-			}
-
+			int baudrate=9600;
 			if(args.length>1)
 			{
 				baudrate=Integer.parseInt(args[1]);	
 			}
 
-			portname=args[0];
-			serialPort=new SerialPort(portname); 
+			String portname=args[0];
 
-			serialPort.openPort();
-			serialPort.setParams(baudrate, 8, 1, 0);
-
-			if(hook_enabled)
-			{
-				sh.portConnect(portname,baudrate);
-			}
-
-			serialPort.setEventsMask(SerialPort.MASK_RXCHAR);
-			serialPort.addEventListener(new SerialPortReader());
-			//serialPort.writeString("HelloWorld");
-
-			Runtime.getRuntime().addShutdownHook(new Thread()
-			{
-				public void run()
-				{
-					try
-					{
-						System.err.println("Shutting down ...");
-						serialPort.removeEventListener();
-						serialPort.closePort();
-						if(raw_log_to_file)
-						{
-							writer_raw.close();
-						}
-						if(hook_enabled)
-						{
-							sh.shutdown();
-						}
-					}
-					catch(SerialPortException e)
-					{
-						System.err.println(e);
-					}
-				}
-			});
+			sr.connectSerialPort(portname,baudrate);
+			sr.addEventListener();
 
 			//check stop condition here
 			while(1==1)
@@ -128,55 +81,118 @@ public class SerialReader
 				Thread.sleep(100);
 			}
 		}
-		catch (InterruptedException e)
-		{
-			System.err.println(e);
-		}
-		catch (FileNotFoundException e)
-		{
-			System.err.println(e);
-			System.exit(1);
-		}
-		catch (UnsupportedEncodingException e)
-		{
-			System.err.println(e);
-			System.exit(1);
-		}
-		catch (SerialPortException e)
-		{
-			System.err.println(e);
-			System.exit(1);
-		}
-		catch (ClassNotFoundException e)
-		{
-			System.err.println(e);
-			System.exit(1);
-		}
-		catch (NoSuchMethodException e)
-		{
-			System.err.println(e);
-			System.exit(1);
-		}
-		catch (InstantiationException e)
-		{
-			System.err.println(e);
-			System.exit(1);
-		}
-		catch (IllegalAccessException e)
-		{
-			System.err.println(e);
-			System.exit(1);
-		}
-		catch (InvocationTargetException e)
+		catch (Exception e)
 		{
 			System.err.println(e);
 			System.exit(1);
 		}
 	}//end main()
 
+//========================================================================
+	void addShutdownHook()
+	{
+		Runtime.getRuntime().addShutdownHook(new Thread()
+		{
+			public void run()
+			{
+				try
+				{
+					shutdown();
+				}
+				catch(Exception e)
+				{
+					System.err.println(e);
+				}
+			}
+		});
+	}
+
+//========================================================================
+	void shutdown() throws Exception
+	{
+		if(serialPort!=null)
+		{
+			serialPort.removeEventListener();
+			serialPort.closePort();
+		}
+
+		if(raw_log_to_file && writer_raw!=null)
+		{
+			writer_raw.close();
+		}
+		if(hook_enabled && sh!=null)
+		{
+			sh.shutdown();
+		}
+	}
+
+//========================================================================
+	void loadProps()
+	{
+		if(!this.loadProps(propertiesFileUri))
+		{
+			System.err.println("/!\\ Could not load properties: "+propertiesFileUri);
+		}
+	}
+
+//========================================================================
+	void addHook(String classname) throws Exception
+	{
+		hook_enabled=true;
+
+		Class<?> c = Class.forName(classname);
+		Constructor<?> cons = c.getConstructor();//String.class);
+		sh = (SerialHookInterface)cons.newInstance();//"MyAttributeValue");
+		sh.startup();
+	}
+
+//========================================================================
+	String createLogFileUri()
+	{
+
+		date_format.setTimeZone(TimeZone.getTimeZone(timezone_id));
+		String raw_log_file_name=raw_log_file_prefix+date_format.format(new Date())+raw_log_file_postfix;
+		String raw_log_file_uri=raw_log_file_base_path+File.separator+raw_log_file_name;
+
+		if(hook_enabled)
+		{
+			sh.logFile(raw_log_file_base_path,raw_log_file_name);
+		}
+
+		return raw_log_file_uri;
+	}
+
+//========================================================================
+	void createLogWriter(String log_file_uri) throws Exception
+	{
+		writer_raw=new PrintWriter(log_file_uri, "UTF-8");
+	}
+
+//========================================================================
+	void connectSerialPort(String portname, int baudrate) throws Exception
+	{
+		serialPort=new SerialPort(portname); 
+
+		serialPort.openPort();
+		serialPort.setParams(baudrate, 8, 1, 0);
+
+		if(hook_enabled)
+		{
+			sh.portConnect(portname,baudrate);
+		}
+
+		serialPort.setEventsMask(SerialPort.MASK_RXCHAR);
+	}
+
+//========================================================================
+	void addEventListener() throws Exception
+	{
+		serialPort.addEventListener(new SerialPortReader());
+	}
+
 	//inner class
 //========================================================================
-	static class SerialPortReader implements SerialPortEventListener
+	class SerialPortReader implements SerialPortEventListener
 	{
 		public void serialEvent(SerialPortEvent event)
 		{
@@ -244,7 +260,7 @@ public class SerialReader
 	}//endclass SerialPortReader
 
 //========================================================================
-	public static boolean loadProps(String configfile_uri)
+	public boolean loadProps(String configfile_uri)
 	{
 		Properties props=new Properties();
 		InputStream is=null;
