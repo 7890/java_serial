@@ -1,0 +1,4 @@
+https://github.com/hoijui/JavaOSC/archive/master.zip
+Fri Oct 17 02:37:24 CEST 2014
+e06f7391a5f701099dafda707c64b2d09640cf86
+https://github.com/hoijui/JavaOSC.git
