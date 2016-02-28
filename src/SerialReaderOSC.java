@@ -29,7 +29,7 @@ class SerialReaderOSC extends SerialReader
 	{
 		if(!loadProps(propertiesFileUri))
 		{
-			System.err.println("/!\\ Could not load properties: "+propertiesFileUri);
+			System.err.println("SerialReaderOSC: /!\\ Could not load properties: "+propertiesFileUri);
 		}
 	}
 
@@ -65,14 +65,14 @@ class SerialReaderOSC extends SerialReader
 			sro.addEventListener();
 
 			//check stop condition here
-			while(1==1)
+			while(!sro.shutdown_requested)
 			{
 				Thread.sleep(100);
 			}
 		}
 		catch(Exception e)
 		{
-			System.err.println(e);
+			System.err.println("SerialReaderOSC: "+e);
 			System.exit(1);
 		}
 	}
@@ -88,8 +88,8 @@ class SerialReaderOSC extends SerialReader
 		portIn.addListener("/*", new StatusListener());
 		portIn.startListening();
 
-		System.err.println("OSC server started on local port "+local_port);
-		System.err.println("OSC sending messages to host "+remote_host+":"+target_port);
+		System.err.println("SerialReaderOSC: OSC server started on local port "+local_port);
+		System.err.println("SerialReaderOSC: OSC sending messages to host "+remote_host+":"+target_port);
 /*
 portInSend.stopListening();
 portInSend.close();
@@ -130,7 +130,7 @@ portInSend.close();
 		}//end try
 		catch(Exception e)
 		{
-			System.err.println(e);
+			System.err.println("SerialReaderOSC: "+e);
 		}
 		return false;
 	}//end loadProps
@@ -147,6 +147,8 @@ class StatusListener implements OSCListener
 		java.util.List<Object> args=msg.getArguments();
 		int argsSize=args.size();
 
+		System.err.println("SerialReaderOSC: got message "+path);
+
 		//split logfile (close current, create new)
 		if(path.equals("/split") && argsSize==0)
 		{
@@ -156,9 +158,14 @@ class StatusListener implements OSCListener
 			}
 			catch(Exception e)
 			{
-				System.err.println(e);
+				System.err.println("SerialReaderOSC: "+e);
 			}
 		}
+		if(path.equals("/quit") && argsSize==0)
+		{
+			shutdown();
+		}
+
 	}//end accpept()
 
 //========================================================================

@@ -32,6 +32,8 @@ public class SerialReader
 	long total_bytes_received=0;
 	SerialHookInterface sh=null;
 
+	boolean shutdown_requested=false;
+
 //========================================================================
 	public SerialReader(){}
 
@@ -76,18 +78,19 @@ public class SerialReader
 			sr.addEventListener();
 
 			//check stop condition here
-			while(1==1)
+			while(!sr.shutdown_requested)
 			{
 				Thread.sleep(100);
 			}
 		}
 		catch (Exception e)
 		{
-			System.err.println(e);
+			System.err.println("SerialReader: "+e);
 			System.exit(1);
 		}
 	}//end main()
 
+	//catch ctrl+c / term signal
 //========================================================================
 	void addShutdownHook()
 	{
@@ -95,35 +98,41 @@ public class SerialReader
 		{
 			public void run()
 			{
-				try
+				//prevent second shutdown if shutdown() called directly
+				if(!shutdown_requested)
 				{
 					shutdown();
-				}
-				catch(Exception e)
-				{
-					System.err.println(e);
 				}
 			}
 		});
 	}
 
 //========================================================================
-	void shutdown() throws Exception
+	void shutdown()
 	{
-		if(serialPort!=null)
+		System.err.println("SerialReader: shutdown()");
+		try
 		{
-			serialPort.removeEventListener();
-			serialPort.closePort();
-		}
+			if(serialPort!=null)
+			{
+				serialPort.removeEventListener();
+				serialPort.closePort();
+			}
 
-		if(raw_log_to_file && writer_raw!=null)
-		{
-			writer_raw.close();
+			if(raw_log_to_file && writer_raw!=null)
+			{
+				writer_raw.close();
+			}
+			if(hook_enabled && sh!=null)
+			{
+				sh.shutdown();
+			}
 		}
-		if(hook_enabled && sh!=null)
+		catch(Exception e)
 		{
-			sh.shutdown();
+			System.err.println("SerialReader: "+e);
 		}
+		shutdown_requested=true;
 	}
 
 //========================================================================
@@ -131,7 +140,7 @@ public class SerialReader
 	{
 		if(!this.loadProps(propertiesFileUri))
 		{
-			System.err.println("/!\\ Could not load properties: "+propertiesFileUri);
+			System.err.println("SerialReader: /!\\ Could not load properties: "+propertiesFileUri);
 		}
 	}
 
@@ -149,7 +158,6 @@ public class SerialReader
 //========================================================================
 	String createLogFileUri()
 	{
-
 		date_format.setTimeZone(TimeZone.getTimeZone(timezone_id));
 		String raw_log_file_name=raw_log_file_prefix+date_format.format(new Date())+raw_log_file_postfix;
 		String raw_log_file_uri=raw_log_file_base_path+File.separator+raw_log_file_name;
@@ -166,11 +174,13 @@ public class SerialReader
 	void createLogWriter(String log_file_uri) throws Exception
 	{
 		writer_raw=new PrintWriter(log_file_uri, "UTF-8");
+		System.err.println("SerialReader: Logging to file "+log_file_uri);
 	}
 
 //========================================================================
 	void splitLogfile() throws Exception
 	{
+		System.err.println("SerialReader: Split logfile");
 		if(serialPort!=null)
 		{
 			serialPort.removeEventListener();
@@ -254,7 +264,7 @@ public class SerialReader
 				}
 				catch(SerialPortException e)
 				{
-					System.err.println(e);
+					System.err.println("SerialReader: "+e);
 				}
 			}
 			//If the CTS line status has changed, then the method event.getEventValue() returns 1 if the line is ON and 0 if it is OFF.
@@ -262,22 +272,22 @@ public class SerialReader
 			{
 				if(event.getEventValue()==1)
 				{
-					System.err.println("CTS - ON");
+					System.err.println("SerialReader: CTS - ON");
 				}
 				else
 				{
-					System.err.println("CTS - OFF");
+					System.err.println("SerialReader: CTS - OFF");
 				}
 			}
 			else if(event.isDSR())
 			{
 				if(event.getEventValue()==1)
 				{
-					System.err.println("DSR - ON");
+					System.err.println("SerialReader: DSR - ON");
 				}
 				else
 				{
-					System.err.println("DSR - OFF");
+					System.err.println("SerialReader: DSR - OFF");
 				}
 			}
 		}//end serialEvent
@@ -327,7 +337,7 @@ public class SerialReader
 		}//end try
 		catch(Exception e)
 		{
-			System.err.println(e);
+			System.err.println("SerialReader: "+e);
 		}
 		return false;
 	}//end loadProps
