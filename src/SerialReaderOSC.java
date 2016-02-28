@@ -85,7 +85,7 @@ class SerialReaderOSC extends SerialReader
 
 		portOut=new OSCPortOut(InetAddress.getByName(remote_host), target_port, ds);
 
-		portIn.addListener("/*", new StatusListener());
+		portIn.addListener("/*", new CommandListener());
 		portIn.startListening();
 
 		System.err.println("SerialReaderOSC: OSC server started on local port "+local_port);
@@ -138,7 +138,7 @@ portInSend.close();
 //inner class
 //========================================================================
 //========================================================================
-class StatusListener implements OSCListener
+class CommandListener implements OSCListener
 {
 //========================================================================
 	public void accept(OSCMessage msg)
