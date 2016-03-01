@@ -195,6 +195,8 @@ public class SerialReader
 		{///
 		}
 
+		total_bytes_received=0;
+
 		if(raw_log_to_file)
 		{
 			createLogWriter(createLogFileUri());
