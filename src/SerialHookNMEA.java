@@ -38,6 +38,7 @@ class SerialHookNMEA implements SerialHookInterface
 		}
 	}
 
+//callback from SerialReader
 //========================================================================
 	public void startup()
 	{
@@ -52,6 +53,7 @@ class SerialHookNMEA implements SerialHookInterface
 		}
 	}
 
+//callback from SerialReader
 //========================================================================
 	public void shutdown()
 	{
@@ -62,6 +64,7 @@ class SerialHookNMEA implements SerialHookInterface
 		}
 	}
 
+//callback from SerialReader
 //========================================================================
 	public void serialData(String data)
 	{
@@ -76,7 +79,7 @@ class SerialHookNMEA implements SerialHookInterface
 			{
 				//if....
 
-				System.out.println(pos);
+				//System.out.println(pos);
 				if(writer_csv!=null)
 				{
 					writer_csv.println(pos);
@@ -121,6 +124,7 @@ class SerialHookNMEA implements SerialHookInterface
 		}
 	}//end serialData()
 
+//callback from SerialReader
 //========================================================================
 	public void logFile(String basePath, String fileName)
 	{
@@ -135,18 +139,22 @@ class SerialHookNMEA implements SerialHookInterface
 				writer_csv.close();
 			}
 			writer_csv=new PrintWriter(file_uri, "UTF-8");
+			writer_csv.println(n.getCSVHeader());
 		}
 		catch(Exception e)
 		{
 			System.err.println("SerialHookNMEA: "+e);
 		}
 	}
+
+//callback from SerialReader
 //========================================================================
 	public void portConnect(String portName, int baudRate)
 	{
 		System.err.println("hook: port connected");
 	}
 
+//callback from SerialReader
 //========================================================================
 	public void init_osc_server(int local_port, String remote_host, int target_port) throws Exception
 	{
@@ -270,6 +278,12 @@ class NMEA
 	void setDebug(boolean debug)
 	{
 		this.debug=debug;
+	}
+
+//=============================================================================
+	String getCSVHeader()
+	{
+		return csv_header;
 	}
 
 //=============================================================================
