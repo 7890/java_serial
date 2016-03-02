@@ -83,6 +83,12 @@ public class SerialReader
 				Thread.sleep(100);
 			}
 		}
+		catch (FileNotFoundException e)
+		{
+			System.err.println("SerialReader: "+e);
+			System.err.println("If logging is enabled in the .properties file, make sure that the directory to write log files exists. ");
+			System.exit(1);
+		}
 		catch (Exception e)
 		{
 			System.err.println("SerialReader: "+e);
