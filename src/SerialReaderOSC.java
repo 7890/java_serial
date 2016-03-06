@@ -3,35 +3,26 @@ import java.net.*;
 import java.io.*;
 import com.illposed.osc.*;
 
+//tb/1603
+
 //========================================================================
 //========================================================================
 class SerialReaderOSC extends SerialReader
 {
 	//this file is loaded if found in current directory
-	String propertiesFileUri="SerialReaderOSC.properties";
+	private String propertiesFileUri="SerialReaderOSC.properties";
 
 	//===configurable parameters (here: default values)
-	int	local_osc_port			=3040;
-	String	remote_osc_host			="127.0.0.1";
-	int	remote_osc_port			=3041;
+	public int	local_osc_port			=3040;
+	public String	remote_osc_host			="127.0.0.1";
+	public int	remote_osc_port			=3041;
 	//===end configurable parameters
 
-	OSCPortOut portOut; //send
-	OSCPortIn portIn; //receive
+	private OSCPortOut portOut; //send
+	private OSCPortIn portIn; //receive
 
 //========================================================================
-	public SerialReaderOSC()
-	{
-	}
-
-//========================================================================
-	public void loadProps()
-	{
-		if(!loadProps(propertiesFileUri))
-		{
-			System.err.println("SerialReaderOSC: /!\\ Could not load properties: "+propertiesFileUri);
-		}
-	}
+	public SerialReaderOSC(){}
 
 //========================================================================
 	public static void main(String[] args)
@@ -53,19 +44,25 @@ class SerialReaderOSC extends SerialReader
 
 			sro.addShutdownHook();
 
-			int baudrate=9600;
-			if(args.length>1)
+			if(args.length>0)
 			{
-				baudrate=Integer.parseInt(args[1]);
+				String portname=args[0];
+				int rate=9600;
+				if(args.length>1)
+				{
+					rate=Integer.parseInt(args[1]);
+				}
+				sro.connectSerialPort(portname,rate);
+			}
+			else
+			{
+				sro.connectSerialPort(sro.serial_port,sro.baudrate);
 			}
 
-			String portname=args[0];
-
-			sro.connectSerialPort(portname,baudrate);
 			sro.addEventListener();
 
 			//check stop condition here
-			while(!sro.shutdown_requested)
+			while(!sro.shutdownRequested())
 			{
 				Thread.sleep(100);
 			}
@@ -97,43 +94,21 @@ portInSend.close();
 	}
 
 //========================================================================
+	public void loadProps()
+	{
+		if(!loadProps(propertiesFileUri))
+		{
+			System.err.println("SerialReaderOSC: /!\\ Could not load properties: "+propertiesFileUri);
+		}
+	}
+
+//========================================================================
 	public boolean loadProps(String configfile_uri)
 	{
-		super.loadProps(super.propertiesFileUri);
-
-		Properties props=new Properties();
-		InputStream is=null;
-
-		//try loading from the current directory
-		try 
-		{
-			File f=new File(configfile_uri);
-			if(f.exists() && f.canRead())
-			{
-				is=new FileInputStream(f);
-				if(is!=null)
-				{
-					props.load(is);
-					if(props!=null)
-					{
-						if(props.getProperty("local_osc_port")!=null)
-							{local_osc_port=Integer.parseInt(props.getProperty("local_osc_port"));}
-						if(props.getProperty("remote_osc_host")!=null)
-							{remote_osc_host=props.getProperty("remote_osc_host");}
-						if(props.getProperty("remote_osc_port")!=null)
-							{remote_osc_port=Integer.parseInt(props.getProperty("remote_osc_port"));}
-						//if(props.getProperty("")!=null){=props.getProperty("");}
-						return true;
-					}
-				}
-			}//end if file exists
-		}//end try
-		catch(Exception e)
-		{
-			System.err.println("SerialReaderOSC: "+e);
-		}
-		return false;
-	}//end loadProps
+		propertiesFileUri=configfile_uri;
+		super.loadProps(super.getPropertiesFileUri());
+		return LProps.load(propertiesFileUri,this);
+	}
 
 //inner class
 //========================================================================
@@ -173,6 +148,6 @@ class CommandListener implements OSCListener
 	{
 		accept(msg);
 	}
-}//end inner class StatusListener
+}//end inner class CommandListener
 }//end classs SerialReaderOSC
 //EOF

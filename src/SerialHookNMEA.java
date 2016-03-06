@@ -7,35 +7,26 @@ import com.illposed.osc.*;
 //========================================================================
 class SerialHookNMEA implements SerialHookInterface
 {
-	PrintWriter writer_csv=null;
-	NMEA n;
-	GPSPosition pos;
+	private PrintWriter writer_csv=null;
+	private NMEA n;
+	private GPSPosition pos;
 
 	//this file is loaded if found in current directory
-	String propertiesFileUri="SerialHookNMEA.properties";
+	private String propertiesFileUri="SerialHookNMEA.properties";
 
 	//===configurable parameters (here: default values)
-	int	local_osc_port			=3050;
-	String	remote_osc_host			="127.0.0.1";
-	int	remote_osc_port			=3051;
+	public int	local_osc_port			=3050;
+	public String	remote_osc_host			="127.0.0.1";
+	public int	remote_osc_port			=3051;
         //===end configurable parameters
 
-	OSCPortOut portOut; //send
+	private OSCPortOut portOut; //send
 
 //========================================================================
 	public SerialHookNMEA()
 	{
 		n=new NMEA();
 		loadProps();
-	}
-
-//========================================================================
-	public void loadProps()
-	{
-		if(!loadProps(propertiesFileUri))
-		{
-			System.err.println("SerialHookNMEA: /!\\ Could not load properties: "+propertiesFileUri);
-		}
 	}
 
 //callback from SerialReader
@@ -170,41 +161,21 @@ portInSend.close();
 	}
 
 //========================================================================
+	public void loadProps()
+	{
+		if(!loadProps(propertiesFileUri))
+		{
+			System.err.println("SerialHookNMEA: /!\\ Could not load properties: "+propertiesFileUri);
+		}
+	}
+
+//========================================================================
 	public boolean loadProps(String configfile_uri)
 	{
-		Properties props=new Properties();
-		InputStream is=null;
+		propertiesFileUri=configfile_uri;
+		return LProps.load(propertiesFileUri,this);
+	}
 
-		//try loading from the current directory
-		try 
-		{
-			File f=new File(configfile_uri);
-			if(f.exists() && f.canRead())
-			{
-				is=new FileInputStream(f);
-				if(is!=null)
-				{
-					props.load(is);
-					if(props!=null)
-					{
-						if(props.getProperty("local_osc_port")!=null)
-							{local_osc_port=Integer.parseInt(props.getProperty("local_osc_port"));}
-						if(props.getProperty("remote_osc_host")!=null)
-							{remote_osc_host=props.getProperty("remote_osc_host");}
-						if(props.getProperty("remote_osc_port")!=null)
-							{remote_osc_port=Integer.parseInt(props.getProperty("remote_osc_port"));}
-						//if(props.getProperty("")!=null){=props.getProperty("");}
-						return true;
-					}
-				}
-			}//end if file exists
-		}//end try
-		catch(Exception e)
-		{
-			System.err.println("SerialHookNMEA: "+e);
-		}
-		return false;
-	}//end loadProps
 }//end class SerialHookNMEA
 
 //NMEA.java from https://github.com/7890/nmea_parser

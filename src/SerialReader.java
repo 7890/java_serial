@@ -1,38 +1,42 @@
-import jssc.*;
-
-import java.io.*;
-import java.text.SimpleDateFormat;
-import java.util.*;
 import java.lang.*;
 import java.lang.reflect.*;
+import java.io.*;
+import java.util.*;
+import java.text.SimpleDateFormat;
+
+import jssc.*;
+
+//tb/1603
 
 //========================================================================
 //========================================================================
 public class SerialReader
 {
-	SerialPort serialPort=null;
-	PrintWriter writer_raw=null;
+	private SerialPort serialPort=null;
+	private PrintWriter writer_raw=null;
 	//this file is loaded if found in current directory
-	String propertiesFileUri="SerialReader.properties";
+	private String propertiesFileUri="SerialReader.properties";
 
 	//===configurable parameters (here: default values)
 	//none | progress | none
-	String stdout_show="raw";
-	boolean raw_log_to_file=false;
-	String raw_log_file_base_path="./";
-	String raw_log_file_prefix="serial_log_";
-	String date_format_string="yyyy-MM-dd_HH-mm-ss";//.SSSZ";
-	String timezone_id="UTC";
-	String raw_log_file_postfix="_"+timezone_id+".nmea";
-	boolean hook_enabled=false;
-	String hook_class="";
+	public String serial_port="/dev/ttyUSB0";
+	public int baudrate=9600;
+	public String stdout_show="raw";
+	public boolean raw_log_to_file=false;
+	public String raw_log_file_base_path="./";
+	public String raw_log_file_prefix="serial_log_";
+	public String date_format_string="yyyy-MM-dd_HH-mm-ss";//.SSSZ";
+	public String timezone_id="UTC";
+	public String raw_log_file_postfix="_"+timezone_id+".nmea";
+	public boolean hook_enabled=false;
+	public String hook_class="";
 	//===end configurable parameters
 
-	SimpleDateFormat date_format=new SimpleDateFormat(date_format_string);
-	long total_bytes_received=0;
-	SerialHookInterface sh=null;
+	private SimpleDateFormat date_format=new SimpleDateFormat(date_format_string);
+	private long total_bytes_received=0;
+	private SerialHookInterface sh=null;
 
-	boolean shutdown_requested=false;
+	private boolean shutdown_requested=false;
 
 //========================================================================
 	public SerialReader(){}
@@ -40,13 +44,14 @@ public class SerialReader
 //========================================================================
 	public static void main(String[] args)
 	{
-		if(args.length<1)
+		if(args.length==1 && (args[0].equals("-h") || args[0].equals("--help")))
 		{
-			System.err.println("Need port argument");
-			System.err.println("Syntax: <serial portname> (baudrate)");
-			System.err.println("Example: /dev/ttyACM0 115200");
-			System.err.println("Default baudrate: 9600");
-			System.exit(1);
+			System.err.println("Syntax: (serial portname) (baudrate)\n");
+			System.err.println("Example: /dev/ttyACM0 115200\n");
+			System.err.println("Default portname: /dev/ttyUSB0");
+			System.err.println("Default baudrate: 9600\n");
+			System.err.println("If no parameters provided, default values will be used.");
+			System.exit(0);
 		}
 
 		SerialReader sr=new SerialReader();
@@ -66,19 +71,25 @@ public class SerialReader
 
 			sr.addShutdownHook();
 
-			int baudrate=9600;
-			if(args.length>1)
+			if(args.length>0)
 			{
-				baudrate=Integer.parseInt(args[1]);	
+				String portname=args[0];
+				int rate=9600;
+				if(args.length>1)
+				{
+					rate=Integer.parseInt(args[1]);	
+				}
+				sr.connectSerialPort(portname,rate);
+			}
+			else
+			{
+				sr.connectSerialPort(sr.serial_port,sr.baudrate);
 			}
 
-			String portname=args[0];
-
-			sr.connectSerialPort(portname,baudrate);
 			sr.addEventListener();
 
 			//check stop condition here
-			while(!sr.shutdown_requested)
+			while(!sr.shutdownRequested())
 			{
 				Thread.sleep(100);
 			}
@@ -107,10 +118,23 @@ public class SerialReader
 				//prevent second shutdown if shutdown() called directly
 				if(!shutdown_requested)
 				{
+					shutdown_requested=true;
 					shutdown();
 				}
 			}
 		});
+	}
+
+//========================================================================
+	boolean shutdownRequested()
+	{
+		return shutdown_requested;
+	}
+
+//========================================================================
+	String getPropertiesFileUri()
+	{
+		return propertiesFileUri;
 	}
 
 //========================================================================
@@ -139,15 +163,6 @@ public class SerialReader
 			System.err.println("SerialReader: "+e);
 		}
 		shutdown_requested=true;
-	}
-
-//========================================================================
-	void loadProps()
-	{
-		if(!this.loadProps(propertiesFileUri))
-		{
-			System.err.println("SerialReader: /!\\ Could not load properties: "+propertiesFileUri);
-		}
 	}
 
 //========================================================================
@@ -302,51 +317,18 @@ public class SerialReader
 	}//endclass SerialPortReader
 
 //========================================================================
+	void loadProps()
+	{
+		if(!this.loadProps(propertiesFileUri))
+		{
+			System.err.println("SerialReader: /!\\ Could not load properties: "+propertiesFileUri);
+		}
+	}
+
+//========================================================================
 	public boolean loadProps(String configfile_uri)
 	{
-		Properties props=new Properties();
-		InputStream is=null;
- 
-		//try loading from the current directory
-		try 
-		{
-			File f=new File(configfile_uri);
-			if(f.exists() && f.canRead())
-			{
-				is=new FileInputStream(f);
-				if(is!=null)
-				{
-					props.load(is);
-					if(props!=null)
-					{
-						if(props.getProperty("stdout_show")!=null)
-							{stdout_show=props.getProperty("stdout_show");}
-						if(props.getProperty("raw_log_to_file")!=null)
-							{raw_log_to_file=Boolean.parseBoolean(props.getProperty("raw_log_to_file"));}
-						if(props.getProperty("raw_log_file_base_path")!=null)
-							{raw_log_file_base_path=props.getProperty("raw_log_file_base_path");}
-						if(props.getProperty("raw_log_file_prefix")!=null)
-							{raw_log_file_prefix=props.getProperty("raw_log_file_prefix");}
-						if(props.getProperty("date_format_string")!=null)
-							{date_format_string=props.getProperty("date_format_string");}
-						if(props.getProperty("timezone_id")!=null)
-							{timezone_id=props.getProperty("timezone_id");}
-						if(props.getProperty("raw_log_file_postfix")!=null)
-							{raw_log_file_postfix=props.getProperty("raw_log_file_postfix");}
-						if(props.getProperty("hook_enabled")!=null)
-							{hook_enabled=Boolean.parseBoolean(props.getProperty("hook_enabled"));}
-						if(props.getProperty("hook_class")!=null)
-							{hook_class=props.getProperty("hook_class");}
-						//if(props.getProperty("")!=null){=props.getProperty("");}
-						return true;
-					}
-				}
-			}//end if file exists
-		}//end try
-		catch(Exception e)
-		{
-			System.err.println("SerialReader: "+e);
-		}
-		return false;
-	}//end loadProps
+		propertiesFileUri=configfile_uri;
+		return LProps.load(propertiesFileUri,this);
+	}
 }//end class SerialReader
