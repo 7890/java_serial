@@ -1,6 +1,8 @@
 import java.util.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.text.DecimalFormat;
+
 /*
 Date(long date)
 Allocates a Date object and initializes it to represent the specified number of milliseconds 
@@ -33,9 +35,11 @@ class DTime
 	private static SimpleDateFormat date2_format=new SimpleDateFormat(date2_format_string);
 	private static SimpleDateFormat date3_format=new SimpleDateFormat(date3_format_string);
 
+	private static DecimalFormat df_time_zero = new java.text.DecimalFormat("000000.000");
+
 	public DTime(){}
 
-	public static void setTimeZone()
+	public static void setTimeZoneUTC()
 	{
 		date_time_format.setTimeZone(TimeZone.getTimeZone(timezone_id));
 		date_format.setTimeZone(TimeZone.getTimeZone(timezone_id));
@@ -69,9 +73,11 @@ class DTime
 	static String timeFromDateTime(String date_time) throws Exception {return time_format.format(date_time_format.parse(date_time));}
 	static long millisSinceStartOfDayFromMillis(long millis) throws Exception {return millis-millisFromDate(dateFromMillis(millis));}
 
+	static String formatTimeLeadingZeros(float time) {return df_time_zero.format(time);}
+
 	public static void main(String[] args) throws Exception
 	{
-		setTimeZone();
+		setTimeZoneUTC(); ///important to call
 		System.err.println("1 "+now());
 		System.err.println("2 "+nowMillis());
 		System.err.println("3 "+dateTimeFromMillis(nowMillis()));
@@ -92,8 +98,11 @@ class DTime
 		System.err.println("18 "+dateFromMillis(millisFrom_ddmmyy("270316")));
 		System.err.println("19 "+millisFrom_HHMMSS("030201"));
 		System.err.println("20 "+millisFrom_HHMMSSpSSS("030201.78934"));
-		System.err.println(""+dateTimeFromMillis(
+		System.err.println("21 "+dateTimeFromMillis(
 			millisFrom_ddmmyy("270316")+millisFrom_HHMMSSpSSS("030201.78934")
 		));
+		System.err.println("22 "+formatTimeLeadingZeros(0.001f));
+		System.err.println("23 "+formatTimeLeadingZeros(314.5f));
+		System.err.println("24 "+formatTimeLeadingZeros(131415f));
 	}
 }

@@ -31,7 +31,7 @@ public class GPSPosition
 	public boolean fixed = false;
 
 //	String csv_header="date;time;lon;lat;quality;dir;alt;vel;lat_err;lon_err;alt_err;dgps_age;mode;sat;fix;PDOP;HDOP;VDOP;";
-	String csv_header="millis_utc;millis_utc_sys;date;time;lon;lat;quality;dir;alt;vel;lat_err;lon_err;alt_err;dgps_age;mode;sat;fix;PDOP;HDOP;VDOP;";
+	public String csv_header="millis_utc;millis_utc_sys;date;time;lon;lat;quality;dir;alt;vel;lat_err;lon_err;alt_err;dgps_age;mode;sat;fix;PDOP;HDOP;VDOP;";
 
 //=============================================================================	
 	public void updatefix()
@@ -45,7 +45,7 @@ public class GPSPosition
 //		return String.format("%d;%s%s%s;%f;%f;%f;%d;%f;%f;%f;%f;%f;%f;%f;%s;%d;%d;%f;%f;%f"
 //			,String.format("%04d",year),String.format("%02d",month),String.format("%02d",day),time
 		return String.format("%d;%d;%s;%s;%f;%f;%d;%f;%f;%f;%f;%f;%f;%f;%s;%d;%d;%f;%f;%f"
-			,millis_utc,millis_utc_sys,date,String.format("%06.3f",time)
+			,millis_utc,millis_utc_sys,date,DTime.formatTimeLeadingZeros(time)
 			,lon,lat,quality,direction,altitude,velocity,lat_err,lon_err,alt_err
 			,dgps_age,mode,sat_in_use,fix_type,PDOP,HDOP,VDOP);
 	}

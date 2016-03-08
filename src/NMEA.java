@@ -65,6 +65,8 @@ public class NMEA
 		sentenceParsers.put("GPZDA", new GPZDA());
 		sentenceParsers.put("GNZDA", new GPZDA());
 
+		DTime.setTimeZoneUTC();
+
 		//GSV (satellites in view)
 	}//end constructor
 
@@ -306,7 +308,7 @@ A status of V means the GPS has a valid fix that is below an internal quality th
 			try{position.date = DTime.yyyymmdd_from_ddmmyy(tokens[9]);}catch(Exception e6){print_parse_error("date");}
 			try{position.millis_utc
 				= DTime.millisFrom_yyyymmdd(position.date)
-				+ DTime.millisFrom_HHMMSSpSSS(""+position.time);
+				+ DTime.millisFrom_HHMMSSpSSS(""+DTime.formatTimeLeadingZeros(position.time));
 			}catch(Exception e7){print_parse_error("millis_utc");}
 			try{position.millis_utc_sys=DTime.nowMillis();}catch(Exception e8){print_parse_error("millis_utc_sys");}
 		}
