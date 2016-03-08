@@ -6,9 +6,9 @@ public class GPSPosition
 	//from local system time
 	public long millis_utc_sys = 0;
 	//yyyymmdd
-	public String date="";
+	public String date="19700101";
 	//HHMMSS.SSS
-	public float time = -1.0f;
+	public float time = 0f;
 	public float lon = 0.0f;
 	public float lat = 0.0f;
 	public int quality = 0;

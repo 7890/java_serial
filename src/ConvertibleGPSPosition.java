@@ -9,14 +9,18 @@ public class ConvertibleGPSPosition extends GPSPosition
 //=============================================================================	
 	public void setValuesFromCsvLine(String csvLine)
 	{
-		String[] tokens = csvLine.split(CSV_DELIMITER);
-		if(tokens.length!=TOKEN_COUNT)
+		try
 		{
-			System.err.println("/!\\ token count does not match");
-			return;
-		}
+			String[] tokens = csvLine.split(CSV_DELIMITER);
+			if(tokens.length!=TOKEN_COUNT)
+			{
+				System.err.println("/!\\ token count does not match");
+				return;
+			}
 
-		setValuesFromStringArray(tokens);
+			setValuesFromStringArray(tokens);
+		}
+		catch(Exception e){e.printStackTrace();}
 	}
 
 //========================================================================

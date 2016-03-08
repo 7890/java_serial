@@ -4,9 +4,8 @@ import com.illposed.osc.OSCMessage;
 //=============================================================================
 public class OSCGPSPosition extends ConvertibleGPSPosition
 {
-/*
-/pos hhsfffifffffffsiifff 1456227925005 1457265094441 "20160223" 134525.500000 7.636898 46.907036 2 -1.000000 754.400024 0.054428 0.280000 0.230000 0.780000 0.400000 "D" 7 3 2.360000 1.330000 1.950000
-*/
+	public OSCGPSPosition(){}
+
 //========================================================================
 	public OSCGPSPosition(GPSPosition pos)
 	{
@@ -72,6 +71,10 @@ public class OSCGPSPosition extends ConvertibleGPSPosition
 			}
                         catch(Exception e){e.printStackTrace();}
 		}//end msg path /pos
+		else
+		{
+			System.err.println("received message not supported: "+path);
+		}
 	}//end setValuesFromOSCMessage
 }//end class OSCGPSPosition
 //EOF
