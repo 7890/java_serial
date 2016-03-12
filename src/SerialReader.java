@@ -32,7 +32,7 @@ public class SerialReader
 	public String hook_class="";
 	//===end configurable parameters
 
-	private SimpleDateFormat date_format=new SimpleDateFormat(date_format_string);
+	private SimpleDateFormat date_format;
 	private long total_bytes_received=0;
 	private SerialHookInterface sh=null;
 
@@ -179,6 +179,7 @@ public class SerialReader
 //========================================================================
 	String createLogFileUri()
 	{
+		date_format=new SimpleDateFormat(date_format_string);
 		date_format.setTimeZone(TimeZone.getTimeZone(timezone_id));
 		String raw_log_file_name=raw_log_file_prefix+date_format.format(new Date())+raw_log_file_postfix;
 		String raw_log_file_uri=raw_log_file_base_path+File.separator+raw_log_file_name;
