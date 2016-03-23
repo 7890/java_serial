@@ -27,10 +27,38 @@ class SerialReaderOSC extends SerialReader
 //========================================================================
 	public static void main(String[] args)
 	{
+		SerialReaderOSC sro=new SerialReaderOSC();
+
+		if(args.length==1
+			&& (args[0].equals("-h") || args[0].equals("--help"))
+			|| args.length>2
+		)
+		{
+			System.err.println("Syntax: (serial portname (baudrate)) | -c (config file)\n");
+			System.err.println("Example: /dev/ttyACM0 115200");
+			System.err.println("Example: -c my.properties\n");
+			System.err.println("Default portname: /dev/ttyUSB0");
+			System.err.println("Default baudrate: 9600");
+			System.err.println("Default properties file: ./"+sro.getPropertiesFileUri()+"\n");
+			System.err.println("If no parameters provided, default values will be used.\n");
+			System.exit(0);
+		}
+
 		try
 		{
-			SerialReaderOSC sro=new SerialReaderOSC();
-			sro.loadProps();
+			if(args.length==2 && (args[0].equals("-c") || args[0].equals("--config")))
+			{
+				if(!sro.loadProps(args[1]))
+				{
+					System.err.println("Could not load properties "+args[1]);
+					System.exit(1);
+				}
+			}
+			else
+			{
+				sro.loadProps();
+			}
+
 			sro.init_osc_server(sro.local_osc_port,sro.remote_osc_host,sro.remote_osc_port);
 
 			if(sro.hook_enabled)
@@ -44,7 +72,8 @@ class SerialReaderOSC extends SerialReader
 
 			sro.addShutdownHook();
 
-			if(args.length>0)
+			//if args available but no config file given try parse port, baudrate
+			if(args.length>0 && !(args[0].equals("-c") || args[0].equals("--config")))
 			{
 				String portname=args[0];
 				int rate=9600;
