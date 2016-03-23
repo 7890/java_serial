@@ -51,9 +51,9 @@ public class SerialReader
 			|| args.length>2
 		)
 		{
-			System.err.println("Syntax: (serial portname (baudrate)) | (config file)\n");
+			System.err.println("Syntax: (serial portname (baudrate)) | -c (config file)\n");
 			System.err.println("Example: /dev/ttyACM0 115200");
-			System.err.println("Example: my.properties\n");
+			System.err.println("Example: -c my.properties\n");
 			System.err.println("Default portname: /dev/ttyUSB0");
 			System.err.println("Default baudrate: 9600");
 			System.err.println("Default properties file: ./"+sr.getPropertiesFileUri()+"\n");
