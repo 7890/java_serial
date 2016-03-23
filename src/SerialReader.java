@@ -44,21 +44,37 @@ public class SerialReader
 //========================================================================
 	public static void main(String[] args)
 	{
-		if(args.length==1 && (args[0].equals("-h") || args[0].equals("--help")))
+		SerialReader sr=new SerialReader();
+
+		if(args.length==1
+			&& (args[0].equals("-h") || args[0].equals("--help"))
+			|| args.length>2
+		)
 		{
-			System.err.println("Syntax: (serial portname) (baudrate)\n");
-			System.err.println("Example: /dev/ttyACM0 115200\n");
+			System.err.println("Syntax: (serial portname (baudrate)) | (config file)\n");
+			System.err.println("Example: /dev/ttyACM0 115200");
+			System.err.println("Example: my.properties\n");
 			System.err.println("Default portname: /dev/ttyUSB0");
-			System.err.println("Default baudrate: 9600\n");
-			System.err.println("If no parameters provided, default values will be used.");
+			System.err.println("Default baudrate: 9600");
+			System.err.println("Default properties file: ./"+sr.getPropertiesFileUri()+"\n");
+			System.err.println("If no parameters provided, default values will be used.\n");
 			System.exit(0);
 		}
 
-		SerialReader sr=new SerialReader();
-
 		try
 		{
-			sr.loadProps();
+			if(args.length==2 && (args[0].equals("-c") || args[0].equals("--config")))
+			{
+				if(!sr.loadProps(args[1]))
+				{
+					System.err.println("Could not load properties "+args[1]);
+					System.exit(1);
+				}
+			}
+			else
+			{
+				sr.loadProps();
+			}
 
 			if(sr.hook_enabled)
 			{
@@ -71,7 +87,8 @@ public class SerialReader
 
 			sr.addShutdownHook();
 
-			if(args.length>0)
+			//if args available but no config file given try parse port, baudrate
+			if(args.length>0 && !(args[0].equals("-c") || args[0].equals("--config")))
 			{
 				String portname=args[0];
 				int rate=9600;
