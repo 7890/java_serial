@@ -66,7 +66,9 @@ class SerialHookGNSSTime implements SerialHookInterface
 						///to set next second, respecting offset
 						String strTimeToSet=
 							DTime.timeCFromMillis(
-								DTime.millisFrom_HHMMSSpSSS(""+(pos.time+1.0f))
+								DTime.millisFrom_HHMMSSpSSS(
+									DTime.formatTimeLeadingZeros(pos.time+1.0f)
+								)
 							);
 
 						System.err.print("NEXT TICK AT "+strTimeToSet);
