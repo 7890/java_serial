@@ -60,7 +60,14 @@ public class SerialReader
 			System.err.println("If no parameters provided, default values will be used.\n");
 			System.exit(0);
 		}
-
+		else if(args.length==1 && (args[0].equals("-d") || args[0].equals("--dump")))
+		{
+			System.out.println("#default hardcoded values (without any .properties file loaded).");
+			System.out.println("#the output contains a complete set of configurable keys and can be used as a template.");
+			System.out.println("#'"+sr.propertiesFileUri+"' is the default name of the file being loaded if not explicitely set with -c");
+			System.out.println(LProps.dumpObject(sr));
+			System.exit(0);
+		}
 		try
 		{
 			if(args.length==2 && (args[0].equals("-c") || args[0].equals("--config")))
