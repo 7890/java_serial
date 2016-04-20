@@ -217,6 +217,10 @@ public class NMEA
 		this.write_to_stdin=false;
 		try
 		{
+			if(print_writer!=null)
+			{
+				print_writer.close();
+			}
 			print_writer=new PrintWriter(file_uri, "UTF-8");
 		}
 		catch(Exception e)
@@ -263,7 +267,9 @@ public class NMEA
 			if(print_writer!=null)
 			{
 				print_writer.flush();
+				print_writer.close();
 			}
+			buffered_reader.close();
 		}
 		catch(Exception e)
 		{
