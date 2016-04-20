@@ -3,6 +3,38 @@ import java.net.*;
 import java.io.*;
 import com.illposed.osc.*;
 
+//tb/1603
+
+/*
+osc messages sent out
+=====================
+
+(OSCGPSPosition)
+
+/pos hhsfffifffffffsiifff (20)
+	millis_utc=        (Long)          args.get(0);
+	millis_utc_sys=    (Long)          args.get(1);
+	date=              (String)        args.get(2);
+	time=              (Float)         args.get(3);
+	lon=               (Float)         args.get(4);
+	lat=               (Float)         args.get(5);
+	quality=           (Integer)       args.get(6);
+	direction=         (Float)         args.get(7);
+	altitude=          (Float)         args.get(8);
+	velocity=          (Float)         args.get(9);
+	lat_err=           (Float)         args.get(10);
+	lon_err=           (Float)         args.get(11);
+	alt_err=           (Float)         args.get(12);
+	dgps_age=          (Float)         args.get(13);
+	mode=              (String)        args.get(14);
+	sat_in_use=        (Integer)       args.get(15);
+	fix_type=          (Integer)       args.get(16);
+	PDOP=              (Float)         args.get(17);
+	HDOP=              (Float)         args.get(18);
+	VDOP=              (Float)         args.get(19);
+
+*/
+
 //========================================================================
 //========================================================================
 class SerialHookNMEA implements SerialHookInterface

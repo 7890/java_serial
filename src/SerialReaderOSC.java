@@ -5,6 +5,16 @@ import com.illposed.osc.*;
 
 //tb/1603
 
+/*
+
+osc messages received/understood
+================================
+
+/split		split logfile
+/quit		stop and shutdown serial reader
+
+*/
+
 //========================================================================
 //========================================================================
 class SerialReaderOSC extends SerialReader
