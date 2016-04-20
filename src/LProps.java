@@ -10,10 +10,14 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.StringReader;
 import java.lang.reflect.Field;
+import java.util.Vector;
+
 //========================================================================
 //========================================================================
 class LProps
 {
+	private final static boolean PROCESS_INSTRUCTIONS=true;
+
 	public LProps(){}
 
 //========================================================================
@@ -81,6 +85,12 @@ class LProps
 //========================================================================
 	public static boolean load(String configfile_uri, Object configurable_object)
 	{
+		return load(configfile_uri, configurable_object, PROCESS_INSTRUCTIONS);
+	}
+
+//========================================================================
+	public static boolean load(String configfile_uri, Object configurable_object, boolean process_lprops_instructions)
+	{
 		try
 		{
 			Properties props=checkLoadFile(configfile_uri);
@@ -88,6 +98,14 @@ class LProps
 			{
 				return false;
 			}
+
+			//test if LProps processing instruction is available
+			if(process_lprops_instructions && props.getProperty("lprops_pre_load_dump")!=null)
+			{
+				System.err.println("LProps pre load dump: "+props.getProperty("lprops_pre_load_dump"));
+				System.err.println(LProps.dumpObject(configurable_object));
+			}
+
 			Class<?> c = configurable_object.getClass();
 			Field[] fields = c.getFields();
 			for(int i=0; i<fields.length;i++)
@@ -143,6 +161,13 @@ class LProps
 					///else if byte,short,long,char,double
 				}//end if found property
 			}//end for all fields
+
+			//test if LProps processing instruction is available
+			if(process_lprops_instructions && props.getProperty("lprops_post_load_dump")!=null)
+			{
+				System.err.println("LProps post load dump: "+props.getProperty("lprops_post_load_dump"));
+				System.err.println(LProps.dumpObject(configurable_object));
+			}
 			return true;
 		}//end try
 		catch(Exception e)
@@ -246,3 +271,42 @@ class LProps
 	}
 
 }//end class LProps
+
+//========================================================================
+//========================================================================
+class LPropsMan
+{
+	public Vector search_entries;
+
+//========================================================================
+	public LPropsMan()
+	{
+		search_entries=new Vector();
+	}//end constructor
+
+//========================================================================
+	public void add(String uri)
+	{
+		search_entries.add(uri);
+	}//end constructor
+
+//========================================================================
+	public void load(Object configurable_object)
+	{
+		if(configurable_object==null)
+		{
+			return;
+		}
+		for(int i=0;i<search_entries.size();i++)
+		{
+			System.err.println("loading '"+(String)search_entries.get(i)+"' ...");
+			if(!LProps.load((String)search_entries.get(i), configurable_object))
+			{
+				System.err.println("/!\\ could not load '"+(String)search_entries.get(i)+"'");
+			}
+		}
+	}
+
+}//end class LPropsMan
+
+//EOF
