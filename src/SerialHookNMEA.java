@@ -50,6 +50,8 @@ class SerialHookNMEA implements SerialHookInterface
 	public int	local_osc_port			=3050;
 	public String	remote_osc_host			="127.0.0.1";
 	public int	remote_osc_port			=3051;
+
+	public boolean	log_to_csv_file			=false;
         //===end configurable parameters
 
 	private OSCPortOut portOut; //send
@@ -103,7 +105,7 @@ class SerialHookNMEA implements SerialHookInterface
 				//if....
 
 				//System.out.println(pos);
-				if(writer_csv!=null)
+				if(writer_csv!=null && log_to_csv_file)
 				{
 					writer_csv.println(pos);
 					writer_csv.flush();
@@ -125,18 +127,25 @@ class SerialHookNMEA implements SerialHookInterface
 //========================================================================
 	public void logFile(String basePath, String fileName)
 	{
+		if(!log_to_csv_file)
+		{
+			System.err.println("SerialHookNMEA: CSV logging disabled");
+			return;
+		}
+
 		String file_uri=basePath+File.separator+fileName+".csv";
-
 		System.err.println("SerialHookNMEA: Logging to file "+file_uri);
-
 		try
 		{
 			if(writer_csv!=null)
 			{
 				writer_csv.close();
 			}
-			writer_csv=new PrintWriter(file_uri, "UTF-8");
-			writer_csv.println(new GPSPosition().getCSVHeader());
+			if(log_to_csv_file)
+			{
+				writer_csv=new PrintWriter(file_uri, "UTF-8");
+				writer_csv.println(new GPSPosition().getCSVHeader());
+			}
 		}
 		catch(Exception e)
 		{
