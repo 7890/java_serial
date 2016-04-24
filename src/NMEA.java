@@ -335,10 +335,10 @@ public class NMEA
 	}
 
 //=============================================================================	
-	static float Latitude2Decimal(String lat, String NS)
+	static double Latitude2Decimal(String lat, String NS)
 	{
-		float med = Float.parseFloat(lat.substring(2))/60.0f;
-		med += Float.parseFloat(lat.substring(0, 2));
+		double med = Double.parseDouble(lat.substring(2))/60.0f;
+		med += Double.parseDouble(lat.substring(0, 2));
 		if(NS.startsWith("S"))
 		{
 			med = -med;
@@ -347,10 +347,10 @@ public class NMEA
 	}
 
 //=============================================================================
-	static float Longitude2Decimal(String lon, String WE)
+	static double Longitude2Decimal(String lon, String WE)
 	{
-		float med = Float.parseFloat(lon.substring(3))/60.0f;
-		med += Float.parseFloat(lon.substring(0, 3));
+		double med = Double.parseDouble(lon.substring(3))/60.0f;
+		med += Double.parseDouble(lon.substring(0, 3));
 		if(WE.startsWith("W"))
 		{
 			med = -med;

@@ -36,8 +36,8 @@ public class ConvertibleGPSPosition extends GPSPosition
 		try{this.millis_utc_sys = Long.parseLong(tokens[1]);}catch(Exception e){print_parse_error("millis_utc_sys");}
 		try{this.date = 			tokens[2];}catch(Exception e){print_parse_error("date");}
 		try{this.time = Float.parseFloat	(tokens[3]);}catch(Exception e){print_parse_error("time");}
-		try{this.lon =  Float.parseFloat	(tokens[4]);}catch(Exception e){print_parse_error("lon");}
-		try{this.lat =  Float.parseFloat	(tokens[5]);}catch(Exception e){print_parse_error("lat");}
+		try{this.lon =  Double.parseDouble	(tokens[4]);}catch(Exception e){print_parse_error("lon");}
+		try{this.lat =  Double.parseDouble	(tokens[5]);}catch(Exception e){print_parse_error("lat");}
 		try{this.quality = Integer.parseInt     (tokens[6]);}catch(Exception e){print_parse_error("quality");}
 		try{this.direction = Float.parseFloat   (tokens[7]);}catch(Exception e){print_parse_error("direction");}
 		try{this.altitude = Float.parseFloat    (tokens[8]);}catch(Exception e){print_parse_error("altitude");}

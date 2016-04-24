@@ -9,8 +9,8 @@ public class GPSPosition
 	public String date="19700101";
 	//HHMMSS.SSS
 	public float time = 0f;
-	public float lon = 0.0f;
-	public float lat = 0.0f;
+	public double lon = 0.0d;
+	public double lat = 0.0d;
 	public int quality = 0;
 	public float direction = -1.0f;
 	public float altitude = -1.0f;

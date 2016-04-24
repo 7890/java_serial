@@ -16,8 +16,8 @@ osc messages sent out
 	millis_utc_sys=    (Long)          args.get(1);
 	date=              (String)        args.get(2);
 	time=              (Float)         args.get(3);
-	lon=               (Float)         args.get(4);
-	lat=               (Float)         args.get(5);
+	lon=               (Double)        args.get(4);
+	lat=               (Double)        args.get(5);
 	quality=           (Integer)       args.get(6);
 	direction=         (Float)         args.get(7);
 	altitude=          (Float)         args.get(8);

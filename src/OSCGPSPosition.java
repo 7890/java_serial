@@ -52,8 +52,8 @@ public class OSCGPSPosition extends ConvertibleGPSPosition
 				this.millis_utc_sys=	(Long)		args.get(1);
 				this.date=		(String)	args.get(2);
 				this.time=		(Float)		args.get(3);
-				this.lon=		(Float)		args.get(4);
-				this.lat=		(Float)		args.get(5);
+				this.lon=		(Double)	args.get(4);
+				this.lat=		(Double)	args.get(5);
 				this.quality=		(Integer)	args.get(6);
 				this.direction=		(Float)		args.get(7);
 				this.altitude=		(Float)		args.get(8);
