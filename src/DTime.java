@@ -11,15 +11,19 @@ since the standard base time known as "the epoch", namely January 1, 1970, 00:00
 
 //tb/1603
 
+//=============================================================================
 class DTime
 {
 	private static String timezone_id="UTC";
 
 	private static String date_format_string="yyyy-MM-dd";
 	private static String time_format_string="HH:mm:ss.SSS";
+	private static String time_format_string_short="HH:mm:ss";
 	private static String date_time_format_string=date_format_string+"_"+time_format_string;
+	private static String date_time_format_string_short=date_format_string+"_"+time_format_string_short;
 
 	private static SimpleDateFormat date_time_format=new SimpleDateFormat(date_time_format_string);
+	private static SimpleDateFormat date_time_format_short=new SimpleDateFormat(date_time_format_string_short);
 	private static SimpleDateFormat date_format=new SimpleDateFormat(date_format_string);
 	private static SimpleDateFormat time_format=new SimpleDateFormat(time_format_string);
 
@@ -44,6 +48,7 @@ class DTime
 	public static void setTimeZoneUTC()
 	{
 		date_time_format.setTimeZone(TimeZone.getTimeZone(timezone_id));
+		date_time_format_short.setTimeZone(TimeZone.getTimeZone(timezone_id));
 		date_format.setTimeZone(TimeZone.getTimeZone(timezone_id));
 		time_format.setTimeZone(TimeZone.getTimeZone(timezone_id));
 		time2_format.setTimeZone(TimeZone.getTimeZone(timezone_id));
@@ -74,6 +79,7 @@ class DTime
 	static String timeCFromMillis(long millis) {return time4_format.format(new Date(millis));}
 
 	static String dateTimeFromMillis(long millis) {return date_time_format.format(new Date(millis));}
+	static String dateTimeFromMillisShort(long millis) {return date_time_format_short.format(new Date(millis));}
 
 	static String dateFromDateTime(String date_time) throws Exception {return date_format.format(date_time_format.parse(date_time));}
 	static String timeFromDateTime(String date_time) throws Exception {return time_format.format(date_time_format.parse(date_time));}
@@ -112,5 +118,7 @@ class DTime
 		System.err.println("24 "+formatTimeLeadingZeros(0.001f));
 		System.err.println("25 "+formatTimeLeadingZeros(314.5f));
 		System.err.println("26 "+formatTimeLeadingZeros(131415f));
+		System.err.println("27 "+dateTimeFromMillisShort(nowMillis()));
 	}
-}
+}//end class DTime
+//EOF
