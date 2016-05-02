@@ -10,7 +10,7 @@ archive="$DIR"/archive
 doc="$DIR"/doc
 
 #linux / osx different mktemp call
-TMPFILE=`mktemp 2>/dev/null || mktemp -t /tmp`
+#TMPFILE=`mktemp 2>/dev/null || mktemp -t /tmp`
 
 NOW=`date +"%s"`
 
@@ -107,9 +107,9 @@ _EOF_
 	echo "starting --help"
 	echo "java -jar "$build"/SerialReader_$NOW.jar -h"
 
-	java -jar "$build"/SerialReader_$NOW.jar -h
-
 	cd "$cur"
+
+	java -jar "$build"/SerialReader_$NOW.jar -h
 }
 
 for tool in java javac jar javadoc; \
