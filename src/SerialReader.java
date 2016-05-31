@@ -23,6 +23,7 @@ public class SerialReader
 	public int baudrate=9600;
 	public String stdout_show="raw";
 	public boolean raw_log_to_file=false;
+	//path where logfiles are put, directory will be created if not existing and logging enabled
 	public String raw_log_file_base_path="./";
 	public String raw_log_file_prefix="serial_log_";
 	public String date_format_string="yyyy-MM-dd_HH-mm-ss";//.SSSZ";
@@ -201,8 +202,19 @@ public class SerialReader
 	}
 
 //========================================================================
-	String createLogFileUri()
+	String createLogFileUri() throws Exception
 	{
+		File log_dir=new File(raw_log_file_base_path);
+		if(!log_dir.exists())
+		{
+			System.err.println("Creating log dir: "+raw_log_file_base_path);
+			log_dir.mkdirs();
+		}
+		if(!log_dir.exists() || !log_dir.isDirectory() || !log_dir.canWrite())
+		{
+			throw new Exception("Invalid raw_log_file_base_path: "+raw_log_file_base_path);
+		}
+
 		date_format=new SimpleDateFormat(date_format_string);
 		date_format.setTimeZone(TimeZone.getTimeZone(timezone_id));
 		String raw_log_file_name=raw_log_file_prefix+date_format.format(new Date())+raw_log_file_postfix;
