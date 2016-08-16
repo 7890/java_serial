@@ -74,7 +74,7 @@ public class GPSPosition
 //=============================================================================		
 	public String toString()
 	{
-		return String.format("%d;%d;%s;%s;%f;%f;%d;%f;%f;%f;%f;%f;%f;%f;%s;%d;%d;%f;%f;%f"
+		return String.format("%d;%d;%s;%s;%.9f;%.9f;%d;%f;%f;%f;%f;%f;%f;%f;%s;%d;%d;%f;%f;%f"
 			,millis_utc,millis_utc_sys,date,time	///DTime.formatTimeLeadingZeros(time)
 			,lon,lat,quality,direction,altitude,velocity,lat_err,lon_err,alt_err
 			,dgps_age,mode,sat_in_use,fix_type,PDOP,HDOP,VDOP);
