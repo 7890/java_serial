@@ -112,7 +112,7 @@ _EOF_
 	java -jar "$build"/SerialReader_$NOW.jar -h
 }
 
-for tool in java javac jar javadoc; \
+for tool in java javac jar javadoc unzip; \
 	do checkAvail "$tool"; done
 
 mkdir -p "$build"
