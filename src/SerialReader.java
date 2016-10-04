@@ -18,9 +18,9 @@ public class SerialReader
 	private String propertiesFileUri="SerialReader.properties";
 
 	//===configurable parameters (here: default values)
-	//none | progress | none
 	public String serial_port="/dev/ttyUSB0";
 	public int baudrate=9600;
+	//none | progress | raw
 	public String stdout_show="raw";
 	public boolean raw_log_to_file=false;
 	//path where logfiles are put, directory will be created if not existing and logging enabled
