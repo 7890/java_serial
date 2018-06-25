@@ -12,9 +12,18 @@ class SerialHookGNSSTime implements SerialHookInterface
 	//this file is loaded if found in current directory
 	private String propertiesFileUri="SerialHookGNSSTime.properties";
 
+/*
+	set_system_time_command:
+	__date_string__ is a placeholder for date %Y-%m-%d	(1970-01-01)
+	__time_string__ is a placeholder for time %H:%M:%S	(00:00:00)
+	command tokens are separated with ','
+	command tokens will be trimmed (remove whitespace at beginning and end)
+	NO USE OF QUOTES in command tokens!
+*/
+
 	//===configurable parameters (here: default values)
 	// /C time		/C date (omitted)
-	public String set_system_time_command="cmd /C nircmdc.exe elevate cmd /C time %"; //HH:MM:SS
+	public String set_system_time_command="cmd, /C, nircmdc.exe, elevate, cmd, /C, time, __time_string__"; //HH:MM:SS
 	public float seconds_to_next_full_second=0.9f;
 	public int minimal_sat_count=4;
 	public int minimal_quality=1;
@@ -68,36 +77,62 @@ class SerialHookGNSSTime implements SerialHookInterface
 
 			if(pos!=null&& pos.last_sentence_type.equals("RMC"))
 			{
-				//if....
 				System.out.print("GNSS TIME "+pos.time +" quality: "+pos.quality+" satellites: "+pos.sat_in_use+" time: "+pos.time);
+
+				/*
+				//test day switch (with positive seconds_offset_to_utc offset >1)
+				pos.date="20180101";
+				pos.time=235959.0f;
+				*/
+				/*
+				//test day switch (with negative seconds_offset_to_utc offset <-1)
+				pos.date="20180102";
+				pos.time=1.0f;
+				*/
 
 				if(pos.time % 1.0f == 0)
 				{
 					System.out.println(" FOUND .0 TIME");
-					//String strDateToSet="02-03-14";
-					//String strTimeToSet="16:17:18";
 					try
 					{
-						//System.err.println(""+pos.time+" "+(pos.time+1.0f));
+						long millisDate=DTime.millisFrom_yyyymmdd(pos.date);
+						long millisTime=DTime.millisFrom_HHMMSS(DTime.formatTimeLeadingZeros(pos.time).substring(0,6));
+						long millisWithOffsetNextTick=millisDate+millisTime
+							+1000 * (seconds_offset_to_utc+1); //+1: one second ahead (next tick)
 
-						///to set next second, respecting offset
-						String strTimeToSet=
-							DTime.timeCFromMillis(
-								DTime.millisFrom_HHMMSSpSSS(DTime.formatTimeLeadingZeros(pos.time))
-								+ 1000 * (1 + seconds_offset_to_utc)
-							);
+						String strDate=DTime.dateFromMillis(millisWithOffsetNextTick);
+						String strTime=DTime.timeFromMillis(millisWithOffsetNextTick);
 
-						System.err.print("NEXT TICK AT "+strTimeToSet+"  (including offset "+seconds_offset_to_utc+")");
+						System.err.println(strDate+" "+strTime);
+
+						String cmd=
+							set_system_time_command.replaceAll("__date_string__", strDate)
+								.replaceAll("__time_string__", strTime);
+
+
+						System.err.println("command tokens: "+cmd);
+						//get tokens
+						String[] cmd_parts = cmd.split(",");
+						//trim whitespace
+						for(int k=0;k<cmd_parts.length;k++)
+						{
+							cmd_parts[k]=cmd_parts[k].trim();
+						}
+
+						System.err.print("NEXT TICK AT "+pos.date+" "+strTime+"  (including offset "+seconds_offset_to_utc+")");
 
 						Thread.sleep((int)(seconds_to_next_full_second*1000));
 						System.err.println(" .");
 
 						System.err.println("Setting system time...");
-						Process p=Runtime.getRuntime().exec(set_system_time_command.replaceAll("%",strTimeToSet)); // hh:mm:ss
-						p.waitFor();
 
-						//drop other lines until next call
-						///break;
+						//new String[] {"sh", "-l", "-c", "./foo"}
+						Process p=Runtime.getRuntime().exec(cmd_parts);
+						int exitval=p.waitFor();
+						if(exitval!=0)
+						{
+							throw new Exception("setting system time was not successful. exit code of command was "+exitval);
+						}
 						System.err.println("done.");
 						all_done=true;
 						System.exit(0);
@@ -105,6 +140,8 @@ class SerialHookGNSSTime implements SerialHookInterface
 					catch(Exception e)
 					{
 						System.err.println("SerialHookGNSSTime: "+e);
+						all_done=true;
+						System.exit(1);
 					}
 				}//end if(pos.time % 1.0f == 0)
 				else
